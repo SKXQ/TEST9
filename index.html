@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Sender</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%; /* Adjust the width as needed for mobile */
+            max-width: 400px; /* Add a max-width for readability on larger screens */
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px; /* Add some spacing between title and form */
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Add spacing between form elements */
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="email"],
+        input[type="text"],
+        textarea,
+        select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        textarea {
+            resize: vertical; /* Allow textarea to be resized vertically */
+        }
+
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #emoji {
+            font-size: 24px; /* Adjust the font-size as needed */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <center><h1>Email Sender</h1></center>
+        <form id="emailForm">
+            <label for="recipientEmail">Email:</label>
+            <input type="email" id="recipientEmail" required>
+            <label for="emailSubject">Subject:</label>
+            <input type="text" id="emailSubject" required>
+            <label for="status">Status:</label>
+            <select id="status">
+                <option value="🚫 Do Not Disturb 🚫"> 🚫 Do Not Disturb 🚫</option>
+                <option value="⚠️ Idle ⚠️"> ⚠️ Idle ⚠️</option>
+                <option value="✅ Active ✅">✅ Active ✅</option>
+                <option value="Custom">Custom</option>
+            </select>
+            <input type="text" id="customStatus" placeholder="Enter custom status" style="display: none;">
+            <label for="until">Until:</label>
+            <input type="date" id="until">
+            <label for="emailBody">Message:</label>
+            <textarea id="emailBody" rows="5" required></textarea>
+            <label for="emoji">Emoji:</label>
+            <select id="emoji">
+                <option value="🙂">🙂</option>
+                <option value="😃">😃</option>
+                <option value="😎">😎</option>
+                <option value="🌟">🌟</option>
+                <option value="🎉">🎉</option>
+                <option value="❤️">❤️</option>
+                <option value="🚀">🚀</option>
+                <option value="🌈">🌈</option>
+                <option value="💡">💡</option>
+                <option value="🔥">🔥</option>
+                <option value="🎈">🎈</option>
+                <option value="🍕">🍕</option>
+                <option value="🍦">🍦</option>
+                <option value="🍔">🍔</option>
+                <option value="🌺">🌺</option>
+                <option value="🌍">🌍</option>
+                <option value="🚗">🚗</option>
+                <option value="🏖️">🏖️</option>
+                <option value="🌄">🌄</option>
+                <option value="🏆">🏆</option>
+                <option value="🍎">🍎</option>
+                <option value="🍓">🍓</option>
+                <option value="🍇">🍇</option>
+                <option value="🍒">🍒</option>
+                <option value="🍍">🍍</option>
+                <option value="🍑">🍑</option>
+                <option value="🍊">🍊</option>
+                <option value="🥝">🥝</option>
+                <option value="🍅">🍅</option>
+                <option value="🥑">🥑</option>
+                <option value="🥦">🥦</option>
+                <option value="🌽">🌽</option>
+                <option value="🥕">🥕</option>
+                <option value="🥔">🥔</option>
+                <option value="🍟">🍟</option>
+                <option value="🍕">🍕</option>
+                <option value="🌮">🌮</option>
+                <option value="🌯">🌯</option>
+                <option value="🥪">🥪</option>
+                <option value="🍔">🍔</option>
+                <option value="🍗">🍗</option>
+                <option value="🍖">🍖</option>
+                <option value="🍤">🍤</option>
+                <option value="🥓">🥓</option>
+                <option value="🍳">🍳</option>
+           </select>
+            <button type="button" id="insertEmoji">Insert Emoji</button>
+            <button type="submit">Send Email</button>
+        </form>
+        <h2>Saved Emails</h2>
+        <ul id="emailList"></ul>
+    </div>
+    <script>
+        // Load saved emails from local storage on page load
+        window.addEventListener('load', function () {
+            const savedEmails = JSON.parse(localStorage.getItem('savedEmails')) || [];
+            const emailList = document.getElementById('emailList');
+
+            // Sort emails alphabetically
+            savedEmails.sort();
+
+            // Populate the email list
+            savedEmails.forEach(function (email) {
+                const listItem = document.createElement('li');
+                listItem.textContent = email;
+                emailList.appendChild(listItem);
+
+                // Add click event listener to populate the email input
+                listItem.addEventListener('click', function () {
+                    document.getElementById('recipientEmail').value = email;
+                });
+            });
+        });
+
+        // Insert Emoji button click event handler
+        document.getElementById('insertEmoji').addEventListener('click', function () {
+            const emoji = document.getElementById('emoji').value;
+            const emailBody = document.getElementById('emailBody');
+
+            // Insert the selected emoji at the cursor position in the email body
+            const cursorPosition = emailBody.selectionStart;
+            const emailBodyValue = emailBody.value;
+            const updatedEmailBody = emailBodyValue.substring(0, cursorPosition) + emoji + emailBodyValue.substring(cursorPosition);
+
+            // Update the email body with the inserted emoji
+            emailBody.value = updatedEmailBody;
+        });
+
+        // Custom status input visibility based on dropdown selection
+        document.getElementById('status').addEventListener('change', function () {
+            const customStatusInput = document.getElementById('customStatus');
+            const selectedStatus = this.value;
+
+            if (selectedStatus === 'Custom') {
+                customStatusInput.style.display = 'block';
+                customStatusInput.required = true;
+            } else {
+                customStatusInput.style.display = 'none';
+                customStatusInput.required = false;
+            }
+        });
+
+        document.getElementById('emailForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const recipientEmail = document.getElementById('recipientEmail').value;
+            const savedEmails = JSON.parse(localStorage.getItem('savedEmails')) || [];
+
+            // Add the new email to the saved emails
+            savedEmails.push(recipientEmail);
+
+            // Sort emails alphabetically
+            savedEmails.sort();
+
+            // Save the updated list to local storage
+            localStorage.setItem('savedEmails', JSON.stringify(savedEmails));
+
+            // Clear and re-populate the email list
+            const emailList = document.getElementById('emailList');
+            emailList.innerHTML = '';
+
+            savedEmails.forEach(function (email) {
+                const listItem = document.createElement('li');
+                listItem.textContent = email;
+                emailList.appendChild(listItem);
+
+                // Add click event listener to populate the email input
+                listItem.addEventListener('click', function () {
+                    document.getElementById('recipientEmail').value = email;
+                });
+            });
+
+            // Get the rest of the email input values
+            const subject = document.getElementById('emailSubject').value;
+            const status = document.getElementById('status').value;
+            const customStatus = document.getElementById('customStatus').value;
+            const until = document.getElementById('until').value;
+            const body = document.getElementById('emailBody').value;
+
+            // Construct the status line based on the selection
+            const statusLine = status === 'Custom' ? customStatus : status;
+
+            // Create the subject line with date, status, and user-defined subject
+            const subjectWithDate = `${statusLine} - ${subject}`;
+
+            // Construct the mailto link
+            const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(subjectWithDate)}&body=${encodeURIComponent(`Until: ${until}\n\n${body}`)}`;
+
+            // Open the user's default email client
+            window.location.href = mailtoLink;
+        });
+    </script>
+</body>
+</html>
